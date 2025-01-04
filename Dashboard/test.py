@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
 data_file = "../Data/superstore.csv"
 
@@ -17,6 +18,17 @@ print(list_columns)
 # print(data)
 
 # Sales by  country
+df['Year'] = pd.DatetimeIndex(df['Order Date']).year
+df['Month'] = pd.DatetimeIndex(df['Order Date']).month
 
-data = df[['Category','Sales']].groupby(by='Category')['Sales'].sum()
-print(data)
+df['Year-Month'] = df['Year'].astype(str) +'-'+  df['Month'].astype(str)
+
+
+data = df[['Year-Month','Sales']].groupby(by=['Year-Month']).sum()['Sales']
+data = data.reset_index()
+plt.plot(data['Year-Month'],data['Sales'])
+plt.show()
+# data = data.unstack()
+
+
+print(data.head())

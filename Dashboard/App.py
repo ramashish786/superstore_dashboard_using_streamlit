@@ -3,6 +3,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
+import matplotlib.pyplot as plt
 from PIL import Image 
 import datetime
 
@@ -14,6 +15,12 @@ df = pd.read_csv(data_file,encoding='unicode_escape')
 
 df['Order Date'] = pd.to_datetime(df['Order Date'])
 df['Ship Date'] = pd.to_datetime(df['Ship Date'])
+
+df['Year'] = pd.DatetimeIndex(df['Order Date']).year
+df['Month'] = pd.DatetimeIndex(df['Order Date']).month
+
+## Adding Year-Month column in dataframe
+df['Year-Month'] = df['Year'].astype(str) +'-'+  df['Month'].astype(str)
 
 
 
@@ -61,6 +68,9 @@ with col3:
 
 _,view1, dwn1, view2, dwn2 = st.columns([0.15,0.20,0.20,0.20,0.20])
 
+
+# Sales By Ship Mode
+
 with view1:
     expander = st.expander("Sales by Ship Mode")
     data = df[["Ship Mode","Sales"]].groupby(by='Ship Mode')['Sales'].sum()
@@ -68,6 +78,7 @@ with view1:
 with dwn1:
     st.download_button("Get Data",data=data.to_csv().encode('utf-8'),file_name='sales_by_ship_mode.csv',mime='text\csv')
 
+# Sales by Category
 
 with col4:
     fig = px.bar(df,x="Category",y="Sales",labels={"Sales":"Total Sales ($)"},
@@ -83,3 +94,48 @@ with view2:
     expander.write(data)
 with dwn2:
     st.download_button("Get Data",data=data.to_csv().encode('utf-8'),file_name='sales_by_category.csv',mime='text\csv')
+
+
+
+col5,col6 = st.columns([0.5,0.5])
+_,view3, dwn3 , view4 , dwn4 = st.columns([0.15,0.20,0.20,0.20,0.20])
+
+
+# Sales by region : 
+with col5:
+    fig = px.bar(df,x="Region",y="Sales",labels={"Sales":"Total Sales ($)"},
+                 title="Total Sales by Category",hover_data=['Sales'],template="gridon",height=500,text='Sales')
+    fig.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+    fig.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+    st.plotly_chart(fig,use_container_width=True)
+with view3:
+    expander = st.expander('Sales by Region')
+    data = df[["Region","Sales"]].groupby(by='Region')["Sales"].sum()
+    expander.write(data)
+
+with dwn3:
+    st.download_button("Get Data",data=data.to_csv().encode('utf-8'),file_name="Sales_by_Region.csv",mime='text\csv')
+
+
+_,col7 = st.columns([0.1,0.9])
+
+
+
+with col7:
+    data = df[['Year-Month','Sales']].groupby(by=['Year-Month']).sum()['Sales']
+    data = data.reset_index()
+    fig = px.bar(data,x="Year-Month",y='Sales')
+    st.plotly_chart(fig,use_container_width=True)
+
+_,view5, dwn5,_= st.columns([0.30,0.20,0.20,0.30])
+
+with view5:
+    expander = st.expander("Sales by Year Month")
+    data = df[['Year-Month','Sales']].groupby(by=['Year-Month']).sum()['Sales']
+    data = data.reset_index()
+    expander.write(data)
+with dwn5:
+    st.download_button("Get Data",data=data.to_csv().encode('utf-8'),file_name='sales_by_Year_Month.csv',mime='text\csv')
+
+
+
