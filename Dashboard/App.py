@@ -38,7 +38,7 @@ with st.sidebar:
         [2014,2015,2016,2017]      
     )
     filters = [int(i) for i in options]
-    st.write(options)
+    #st.write(options)
 
 
 
